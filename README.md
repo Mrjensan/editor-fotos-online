@@ -22,6 +22,11 @@ Um editor de imagens simples feito com HTML5 Canvas e JavaScript.
 
 👉 **[Testar o Editor](https://mrjensan.github.io/editor-fotos-online/)**
 
+## 💝 Outros Projetos
+
+- 🎨 **[Página Romântica](https://mrjensan.github.io/romantico-para-mozao/)** - Site fofo com gatinhos e mensagens carinhosas
+- 📊 **[Dashboard Demo](https://mrjensan.github.io/dashboard-demo/)** - Painel analytics interativo
+
 ## 🛠️ Como usar
 
 1. Abra o link acima ou baixe o projeto

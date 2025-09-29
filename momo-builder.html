@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoMo Builder - Criador de Páginas Personalizadas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #ff6b6b, #ffd93d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .builder {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .panel h2 {
+            margin-bottom: 20px;
+            color: #4a5568;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.2);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .image-upload {
+            border: 3px dashed #cbd5e0;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .image-upload:hover {
+            border-color: #667eea;
+            background: #f7fafc;
+        }
+
+        .image-upload.dragover {
+            border-color: #667eea;
+            background: #ebf8ff;
+        }
+
+        .uploaded-images {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .image-preview {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            aspect-ratio: 1;
+        }
+
+        .image-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .image-preview .remove {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .template-card {
+            border: 3px solid #e2e8f0;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .template-card:hover {
+            border-color: #667eea;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .template-card.selected {
+            border-color: #667eea;
+            background: #ebf8ff;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 10px 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #ff6b6b, #ffd93d);
+        }
+
+        .preview-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .code-output {
+            background: #2d3748;
+            color: #a0aec0;
+            border-radius: 15px;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .actions {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .builder {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+            
+            header h1 {
+                font-size: 2rem;
+            }
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background: #48bb78;
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            transform: translateX(100%);
+            transition: transform 0.3s;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎨 MoMo Builder</h1>
+            <p>Crie suas próprias páginas web personalizadas de forma fácil!</p>
+        </header>
+
+        <div class="builder">
+            <!-- PAINEL DE CONFIGURAÇÕES -->
+            <div class="panel">
+                <h2>📝 Configurações</h2>
+                
+                <div class="form-group">
+                    <label for="pageTitle">Título da Página</label>
+                    <input type="text" id="pageTitle" placeholder="Minha Página Incrível" value="Minha Página Especial">
+                </div>
+
+                <div class="form-group">
+                    <label for="pageSubtitle">Subtítulo</label>
+                    <input type="text" id="pageSubtitle" placeholder="Uma descrição legal" value="Criada com MoMo Builder">
+                </div>
+
+                <div class="form-group">
+                    <label for="pageContent">Conteúdo Principal</label>
+                    <textarea id="pageContent" placeholder="Escreva seu conteúdo aqui...">Bem-vindo à minha página personalizada! 
+                    
+Este é um exemplo de como você pode criar sua própria página web de forma rápida e fácil.
+
+Adicione suas imagens, personalize o texto e escolha um template que combine com você!</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="backgroundColor">Cor de Fundo</label>
+                    <select id="backgroundColor">
+                        <option value="gradient1">Gradiente Azul-Roxo</option>
+                        <option value="gradient2">Gradiente Rosa-Laranja</option>
+                        <option value="gradient3">Gradiente Verde-Azul</option>
+                        <option value="dark">Escuro</option>
+                        <option value="light">Claro</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>🖼️ Suas Imagens</label>
+                    <div class="image-upload" id="imageUpload">
+                        <p>📸 Clique ou arraste imagens aqui</p>
+                        <input type="file" id="imageInput" multiple accept="image/*" style="display: none;">
+                    </div>
+                    <div class="uploaded-images" id="uploadedImages"></div>
+                </div>
+            </div>
+
+            <!-- PAINEL DE TEMPLATES -->
+            <div class="panel">
+                <h2>🎨 Escolha seu Template</h2>
+                
+                <div class="template-grid">
+                    <div class="template-card selected" data-template="minimal">
+                        <div style="font-size: 2rem;">📄</div>
+                        <h4>Minimalista</h4>
+                        <p>Simples e limpo</p>
+                    </div>
+                    
+                    <div class="template-card" data-template="gallery">
+                        <div style="font-size: 2rem;">🖼️</div>
+                        <h4>Galeria</h4>
+                        <p>Foco nas imagens</p>
+                    </div>
+                    
+                    <div class="template-card" data-template="portfolio">
+                        <div style="font-size: 2rem;">💼</div>
+                        <h4>Portfólio</h4>
+                        <p>Profissional</p>
+                    </div>
+                    
+                    <div class="template-card" data-template="blog">
+                        <div style="font-size: 2rem;">📝</div>
+                        <h4>Blog</h4>
+                        <p>Para artigos</p>
+                    </div>
+                    
+                    <div class="template-card" data-template="romantic">
+                        <div style="font-size: 2rem;">💕</div>
+                        <h4>Romântico</h4>
+                        <p>Para o mozão</p>
+                    </div>
+                    
+                    <div class="template-card" data-template="fun">
+                        <div style="font-size: 2rem;">🎉</div>
+                        <h4>Divertido</h4>
+                        <p>Animado</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PREVIEW E CÓDIGO -->
+        <div class="preview-panel">
+            <h2>👀 Preview ao Vivo</h2>
+            <iframe id="preview" style="width: 100%; height: 400px; border: 3px solid #e2e8f0; border-radius: 15px; background: white;"></iframe>
+        </div>
+
+        <div class="preview-panel">
+            <h2>💻 Código HTML Gerado</h2>
+            <div class="code-output" id="codeOutput"></div>
+        </div>
+
+        <div class="actions">
+            <button class="btn" onclick="updatePreview()">🔄 Atualizar Preview</button>
+            <button class="btn btn-secondary" onclick="downloadHTML()">📥 Baixar HTML</button>
+            <button class="btn" onclick="copyCode()">📋 Copiar Código</button>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script src="momo-builder.js"></script>
+</body>
+</html>
