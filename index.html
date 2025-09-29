@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Photo Editor - Redirecionamento</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        .container {
+            text-align: center;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #ff6b6b, #ffd93d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            background: linear-gradient(45deg, #ff6b6b, #ffd93d);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .countdown {
+            font-size: 1rem;
+            opacity: 0.7;
+            margin-top: 20px;
+        }
+        
+        .features {
+            margin-top: 30px;
+            text-align: left;
+        }
+        
+        .features ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .features li {
+            margin: 8px 0;
+            opacity: 0.8;
+        }
+        
+        .features li::before {
+            content: "✨";
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Master Photo Editor</h1>
+        <p>Editor de fotos profissional com todas as funcionalidades avançadas!</p>
+        
+        <div class="features">
+            <ul>
+                <li>Ferramentas profissionais (pincel, borracha, balde, texto)</li>
+                <li>Sistema de camadas multicamada completo</li>
+                <li>Filtros pixel-perfect avançados</li>
+                <li>Histórico undo/redo com 50 níveis</li>
+                <li>Interface PhotoShop-style responsiva</li>
+                <li>Suporte drag & drop e múltiplos formatos</li>
+            </ul>
+        </div>
+        
+        <a href="master-photo-editor.html" class="btn">🚀 Abrir Editor</a>
+        
+        <div class="countdown">
+            Redirecionamento automático em <span id="counter">5</span> segundos...
+        </div>
+    </div>
+    
+    <script>
+        // Countdown e redirecionamento automático
+        let seconds = 5;
+        const counter = document.getElementById('counter');
+        
+        const countdown = setInterval(() => {
+            seconds--;
+            counter.textContent = seconds;
+            
+            if (seconds <= 0) {
+                clearInterval(countdown);
+                window.location.href = 'master-photo-editor.html';
+            }
+        }, 1000);
+        
+        // Efeitos visuais
+        document.addEventListener('mousemove', (e) => {
+            const container = document.querySelector('.container');
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+            
+            container.style.transform = `translate(${x * 10}px, ${y * 10}px)`;
+        });
+    </script>
+</body>
+</html>

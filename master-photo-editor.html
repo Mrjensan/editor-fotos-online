@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Photo Editor - Editor de Fotos Completo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #2c2c2c;
+            color: #ffffff;
+            overflow: hidden;
+        }
+
+        .editor-container {
+            display: flex;
+            height: 100vh;
+            background: #383838;
+        }
+
+        /* TOOLBAR */
+        .toolbar {
+            width: 60px;
+            background: #2c2c2c;
+            border-right: 1px solid #444;
+            display: flex;
+            flex-direction: column;
+            padding: 10px 0;
+            gap: 5px;
+        }
+
+        .tool-btn {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto;
+            background: #404040;
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .tool-btn:hover {
+            background: #505050;
+            transform: scale(1.1);
+        }
+
+        .tool-btn.active {
+            background: #0084ff;
+            box-shadow: 0 0 10px rgba(0, 132, 255, 0.5);
+        }
+
+        /* PAINEL LATERAL */
+        .sidebar {
+            width: 300px;
+            background: #2c2c2c;
+            border-right: 1px solid #444;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel {
+            border-bottom: 1px solid #444;
+        }
+
+        .panel-header {
+            padding: 12px 16px;
+            background: #383838;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-content {
+            padding: 16px;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .panel-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .panel-content::-webkit-scrollbar-track {
+            background: #2c2c2c;
+        }
+
+        .panel-content::-webkit-scrollbar-thumb {
+            background: #555;
+            border-radius: 4px;
+        }
+
+        /* CONTROLES DE FERRAMENTA */
+        .tool-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .control-label {
+            font-size: 12px;
+            color: #ccc;
+            font-weight: 500;
+        }
+
+        .control-slider {
+            -webkit-appearance: none;
+            height: 6px;
+            background: #404040;
+            border-radius: 3px;
+            outline: none;
+        }
+
+        .control-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #0084ff;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .control-input {
+            background: #404040;
+            border: 1px solid #555;
+            color: #fff;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .color-picker {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            background: #ff0000;
+        }
+
+        /* LAYERS PANEL */
+        .layers-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .layer-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            background: #383838;
+            margin-bottom: 2px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .layer-item:hover {
+            background: #454545;
+        }
+
+        .layer-item.active {
+            background: #0084ff;
+        }
+
+        .layer-visibility {
+            width: 20px;
+            height: 20px;
+            margin-right: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .layer-thumbnail {
+            width: 32px;
+            height: 32px;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill-opacity="0.1"><rect x="0" y="0" width="8" height="8" fill="white"/><rect x="8" y="8" width="8" height="8" fill="white"/></svg>');
+            border: 1px solid #555;
+            border-radius: 4px;
+            margin-right: 8px;
+        }
+
+        .layer-name {
+            flex: 1;
+            font-size: 12px;
+        }
+
+        .layer-buttons {
+            display: flex;
+            gap: 4px;
+        }
+
+        .layer-btn {
+            width: 20px;
+            height: 20px;
+            background: none;
+            border: none;
+            color: #ccc;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .layer-btn:hover {
+            color: #fff;
+        }
+
+        /* CANVAS ÁREA */
+        .canvas-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #383838;
+        }
+
+        .top-bar {
+            height: 60px;
+            background: #2c2c2c;
+            border-bottom: 1px solid #444;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            gap: 20px;
+        }
+
+        .file-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            background: #404040;
+            border: 1px solid #555;
+            color: #fff;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: #505050;
+            transform: translateY(-1px);
+        }
+
+        .btn.primary {
+            background: #0084ff;
+            border-color: #0084ff;
+        }
+
+        .canvas-area {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #383838;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #mainCanvas {
+            border: 2px solid #555;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            background: white;
+            max-width: 90%;
+            max-height: 90%;
+        }
+
+        /* NOTIFICAÇÕES */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: #4caf50;
+            color: white;
+        }
+
+        .notification.error {
+            background: #f44336;
+            color: white;
+        }
+
+        .notification.warning {
+            background: #ff9800;
+            color: white;
+        }
+
+        .notification.info {
+            background: #2196f3;
+            color: white;
+        }
+
+        /* DROP ZONE */
+        .drop-zone {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 132, 255, 0.2);
+            border: 3px dashed #0084ff;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .drop-zone.active {
+            display: flex;
+        }
+
+        /* RESPONSIVO */
+        @media (max-width: 768px) {
+            .editor-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: 200px;
+                order: 2;
+            }
+            
+            .toolbar {
+                width: 100%;
+                height: 60px;
+                flex-direction: row;
+                justify-content: center;
+                order: 1;
+            }
+            
+            .canvas-container {
+                order: 3;
+            }
+        }
+
+        /* FILTROS */
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 8px;
+        }
+
+        .filter-btn {
+            padding: 8px;
+            background: #404040;
+            border: 1px solid #555;
+            color: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover {
+            background: #505050;
+            border-color: #0084ff;
+        }
+
+        /* LOADING */
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px 40px;
+            border-radius: 8px;
+            z-index: 1001;
+            display: none;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #404040;
+            border-top: 4px solid #0084ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="editor-container">
+        <!-- TOOLBAR -->
+        <div class="toolbar">
+            <button class="tool-btn active" data-tool="brush" title="Pincel (B)">🖌️</button>
+            <button class="tool-btn" data-tool="eraser" title="Borracha (E)">🧽</button>
+            <button class="tool-btn" data-tool="bucket" title="Balde de Tinta (G)">🪣</button>
+            <button class="tool-btn" data-tool="eyedropper" title="Conta-gotas (I)">💧</button>
+            <button class="tool-btn" data-tool="text" title="Texto (T)">📝</button>
+            <div style="height: 20px; border-top: 1px solid #444; margin: 10px 5px;"></div>
+            <button class="tool-btn" onclick="editor.undo()" title="Desfazer (Ctrl+Z)">↶</button>
+            <button class="tool-btn" onclick="editor.redo()" title="Refazer (Ctrl+Shift+Z)">↷</button>
+        </div>
+
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <!-- CONTROLES DE FERRAMENTA -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span>🛠️ Ferramentas</span>
+                </div>
+                <div class="panel-content">
+                    <div class="tool-controls">
+                        <div class="control-group">
+                            <label class="control-label">Cor Principal</label>
+                            <input type="color" id="colorPicker" class="color-picker" value="#000000">
+                        </div>
+                        
+                        <div class="control-group">
+                            <label class="control-label">Tamanho: <span id="sizeValue">5</span>px</label>
+                            <input type="range" id="sizeSlider" class="control-slider" min="1" max="100" value="5">
+                        </div>
+                        
+                        <div class="control-group">
+                            <label class="control-label">Opacidade: <span id="opacityValue">100</span>%</label>
+                            <input type="range" id="opacitySlider" class="control-slider" min="1" max="100" value="100">
+                        </div>
+                        
+                        <div class="control-group">
+                            <label class="control-label">Tolerância: <span id="toleranceValue">32</span></label>
+                            <input type="range" id="toleranceSlider" class="control-slider" min="0" max="100" value="32">
+                        </div>
+                        
+                        <div class="control-group">
+                            <label class="control-label">Fonte</label>
+                            <select id="fontSelect" class="control-input">
+                                <option value="Arial">Arial</option>
+                                <option value="Helvetica">Helvetica</option>
+                                <option value="Times New Roman">Times New Roman</option>
+                                <option value="Georgia">Georgia</option>
+                                <option value="Verdana">Verdana</option>
+                            </select>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label class="control-label">Tamanho da Fonte: <span id="fontSizeValue">24</span>px</label>
+                            <input type="range" id="fontSizeSlider" class="control-slider" min="8" max="72" value="24">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LAYERS -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span>🗂️ Camadas</span>
+                    <div>
+                        <button class="layer-btn" onclick="addNewLayer()" title="Nova Camada">➕</button>
+                        <button class="layer-btn" onclick="deleteCurrentLayer()" title="Deletar Camada">🗑️</button>
+                    </div>
+                </div>
+                <div class="panel-content">
+                    <div id="layersList" class="layers-panel">
+                        <!-- Layers serão inseridas dinamicamente -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- FILTROS -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span>🎨 Filtros</span>
+                </div>
+                <div class="panel-content">
+                    <div class="filters-grid">
+                        <button class="filter-btn" onclick="applyFilter('grayscale')">Cinza</button>
+                        <button class="filter-btn" onclick="applyFilter('sepia')">Sépia</button>
+                        <button class="filter-btn" onclick="applyFilter('invert')">Inverter</button>
+                        <button class="filter-btn" onclick="applyFilter('brightness', 50)">+Brilho</button>
+                        <button class="filter-btn" onclick="applyFilter('brightness', -50)">-Brilho</button>
+                        <button class="filter-btn" onclick="applyFilter('contrast', 50)">+Contraste</button>
+                        <button class="filter-btn" onclick="applyFilter('contrast', -50)">-Contraste</button>
+                        <button class="filter-btn" onclick="applyFilter('blur', 2)">Blur</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CANVAS AREA -->
+        <div class="canvas-container">
+            <!-- TOP BAR -->
+            <div class="top-bar">
+                <div class="file-controls">
+                    <button class="btn" onclick="document.getElementById('fileInput').click()">📁 Abrir</button>
+                    <button class="btn" onclick="createNewDocument()">📄 Novo</button>
+                    <button class="btn primary" onclick="saveImage()">💾 Salvar</button>
+                    <button class="btn" onclick="exportImage()">📤 Exportar</button>
+                </div>
+                
+                <div class="file-controls">
+                    <button class="btn" onclick="resizeCanvas()">📏 Redimensionar</button>
+                    <button class="btn" onclick="clearCanvas()">🧹 Limpar</button>
+                    <button class="btn" onclick="showInfo()">ℹ️ Info</button>
+                </div>
+                
+                <input type="file" id="fileInput" accept="image/*" style="display: none;">
+            </div>
+
+            <!-- CANVAS -->
+            <div class="canvas-area" id="canvasArea">
+                <canvas id="mainCanvas" width="800" height="600"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- ELEMENTOS DE FEEDBACK -->
+    <div class="drop-zone" id="dropZone">
+        <div>📁 Solte sua imagem aqui para carregar</div>
+    </div>
+
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <div>Processando...</div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script src="js/master-editor-complete.js"></script>
+    <script>
+        // VARIÁVEIS GLOBAIS
+        let editor;
+        let currentNotification = null;
+
+        // INICIALIZAÇÃO COM DEBUG COMPLETO
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔧 DOM carregado, iniciando editor...');
+            
+            try {
+                // Verificar se a classe existe
+                if (typeof MasterImageEditor === 'undefined') {
+                    throw new Error('Classe MasterImageEditor não foi carregada!');
+                }
+                
+                // Verificar se o canvas existe
+                const canvas = document.getElementById('mainCanvas');
+                if (!canvas) {
+                    throw new Error('Canvas mainCanvas não encontrado!');
+                }
+                
+                console.log('✅ Pré-requisitos verificados, criando editor...');
+                
+                editor = new MasterImageEditor('mainCanvas');
+                
+                console.log('✅ Editor criado, configurando UI...');
+                
+                setupUI();
+                setupFileHandling();
+                
+                console.log('🚀 Master Photo Editor inicializado com sucesso!');
+                showNotification('Master Photo Editor carregado com sucesso!', 'success');
+                
+                // Debug da configuração inicial
+                console.log('📊 Info do editor:', editor.getInfo());
+                
+            } catch (error) {
+                console.error('❌ Erro na inicialização:', error);
+                console.error('Stack trace:', error.stack);
+                showNotification('Erro ao carregar o editor: ' + error.message, 'error');
+                
+                // Mostrar informações de debug
+                console.log('🔍 Debug info:');
+                console.log('- MasterImageEditor exists:', typeof MasterImageEditor !== 'undefined');
+                console.log('- Canvas exists:', !!document.getElementById('mainCanvas'));
+            }
+        });
+
+        // CONFIGURAÇÃO DA UI COM DEBUG
+        function setupUI() {
+            try {
+                console.log('🎨 Configurando UI...');
+                
+                // Tool buttons
+                const toolButtons = document.querySelectorAll('.tool-btn[data-tool]');
+                console.log('🛠️ Botões de ferramenta encontrados:', toolButtons.length);
+                
+                toolButtons.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        try {
+                            const tool = btn.dataset.tool;
+                            console.log('🔧 Alterando ferramenta para:', tool);
+                            setActiveTool(tool);
+                            if (editor && editor.setTool) {
+                                editor.setTool(tool);
+                            } else {
+                                console.error('❌ Editor ou setTool não disponível');
+                            }
+                        } catch (error) {
+                            console.error('❌ Erro ao trocar ferramenta:', error);
+                        }
+                    });
+                });
+
+                // Controles de ferramenta
+                setupToolControls();
+                
+                // Eventos personalizados do editor
+                setupEditorEvents();
+                
+                // Atualizar UI inicial
+                updateLayersUI();
+                
+                console.log('✅ UI configurada com sucesso');
+            } catch (error) {
+                console.error('❌ Erro ao configurar UI:', error);
+                showNotification('Erro na configuração da interface', 'error');
+            }
+        }
+
+        function setupToolControls() {
+            try {
+                console.log('🎛️ Configurando controles...');
+                
+                // Color picker
+                const colorPicker = document.getElementById('colorPicker');
+                if (!colorPicker) {
+                    console.error('❌ Color picker não encontrado!');
+                    return;
+                }
+                
+                colorPicker.addEventListener('change', (e) => {
+                    try {
+                        const color = e.target.value;
+                        console.log('🎨 Cor alterada para:', color);
+                        
+                        if (editor && editor.toolSettings) {
+                            editor.toolSettings.brush.color = color;
+                            editor.toolSettings.bucket.color = color;
+                            editor.toolSettings.text.color = color;
+                        } else {
+                            console.error('❌ Editor ou toolSettings não disponível');
+                        }
+                    } catch (error) {
+                        console.error('❌ Erro ao alterar cor:', error);
+                    }
+                });
+
+            // Size slider
+            const sizeSlider = document.getElementById('sizeSlider');
+            const sizeValue = document.getElementById('sizeValue');
+            sizeSlider.addEventListener('input', (e) => {
+                const size = parseInt(e.target.value);
+                editor.toolSettings.brush.size = size;
+                editor.toolSettings.eraser.size = size;
+                sizeValue.textContent = size;
+            });
+
+            // Opacity slider
+            const opacitySlider = document.getElementById('opacitySlider');
+            const opacityValue = document.getElementById('opacityValue');
+            opacitySlider.addEventListener('input', (e) => {
+                const opacity = parseInt(e.target.value);
+                editor.toolSettings.brush.opacity = opacity;
+                editor.toolSettings.eraser.opacity = opacity;
+                opacityValue.textContent = opacity;
+            });
+
+            // Tolerance slider
+            const toleranceSlider = document.getElementById('toleranceSlider');
+            const toleranceValue = document.getElementById('toleranceValue');
+            toleranceSlider.addEventListener('input', (e) => {
+                const tolerance = parseInt(e.target.value);
+                editor.toolSettings.bucket.tolerance = tolerance;
+                toleranceValue.textContent = tolerance;
+            });
+
+            // Font controls
+            const fontSelect = document.getElementById('fontSelect');
+            fontSelect.addEventListener('change', (e) => {
+                editor.toolSettings.text.font = e.target.value;
+            });
+
+            const fontSizeSlider = document.getElementById('fontSizeSlider');
+            const fontSizeValue = document.getElementById('fontSizeValue');
+            fontSizeSlider.addEventListener('input', (e) => {
+                const size = parseInt(e.target.value);
+                editor.toolSettings.text.size = size;
+                fontSizeValue.textContent = size;
+            });
+            
+            console.log('✅ Controles configurados');
+            } catch (error) {
+                console.error('❌ Erro ao configurar controles:', error);
+            }
+        }
+
+        function setupEditorEvents() {
+            // Notificações
+            document.addEventListener('editorNotification', (e) => {
+                showNotification(e.detail.message, e.detail.type);
+            });
+
+            // Drop zone
+            document.addEventListener('editorDropZone', (e) => {
+                const dropZone = document.getElementById('dropZone');
+                dropZone.classList.toggle('active', e.detail.show);
+            });
+
+            // Color picker
+            document.addEventListener('colorPicked', (e) => {
+                document.getElementById('colorPicker').value = e.detail.color;
+            });
+        }
+
+        function setupFileHandling() {
+            // File input
+            document.getElementById('fileInput').addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    showLoading(true);
+                    editor.loadImageFromFile(file)
+                        .then(() => {
+                            updateLayersUI();
+                            showLoading(false);
+                        })
+                        .catch((error) => {
+                            console.error('Erro ao carregar arquivo:', error);
+                            showLoading(false);
+                        });
+                }
+            });
+
+            // Drag & Drop
+            editor.setupDragAndDrop(document.body);
+        }
+
+        // CONTROLES DE FERRAMENTA
+        function setActiveTool(toolName) {
+            document.querySelectorAll('.tool-btn[data-tool]').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            document.querySelector(`[data-tool="${toolName}"]`).classList.add('active');
+        }
+
+        // CONTROLES DE LAYER
+        function updateLayersUI() {
+            try {
+                const layersList = document.getElementById('layersList');
+                if (!layersList) {
+                    console.error('❌ layersList element not found!');
+                    return;
+                }
+                
+                if (!editor || !editor.layers) {
+                    console.error('❌ Editor ou layers não disponíveis');
+                    return;
+                }
+                
+                console.log('🗋 Atualizando UI de layers, total:', editor.layers.length);
+                
+                layersList.innerHTML = '';
+                
+                editor.layers.forEach((layer, index) => {
+                    if (!layer) {
+                        console.warn('⚠️ Layer', index, 'está null/undefined');
+                        return;
+                    }
+                    
+                    const layerItem = document.createElement('div');
+                    layerItem.className = `layer-item ${index === editor.activeLayerIndex ? 'active' : ''}`;
+                    
+                    layerItem.innerHTML = `
+                        <div class="layer-visibility" onclick="toggleLayerVisibility(${index})">
+                            ${layer.visible ? '👁️' : '🚫'}
+                        </div>
+                        <div class="layer-thumbnail"></div>
+                        <div class="layer-name">${layer.name || `Layer ${index + 1}`}</div>
+                        <div class="layer-buttons">
+                            <button class="layer-btn" onclick="duplicateLayer(${index})" title="Duplicar">📋</button>
+                            <button class="layer-btn" onclick="lockLayer(${index})" title="${layer.locked ? 'Desbloquear' : 'Bloquear'}">
+                                ${layer.locked ? '🔒' : '🔓'}
+                            </button>
+                        </div>
+                    `;
+                    
+                    layerItem.addEventListener('click', (e) => {
+                        if (!e.target.classList.contains('layer-btn') && !e.target.classList.contains('layer-visibility')) {
+                            setActiveLayer(index);
+                        }
+                    });
+                    
+                    layersList.appendChild(layerItem);
+                    
+                    console.log(`🗋 Layer ${index}: ${layer.name} (visible: ${layer.visible}, active: ${index === editor.activeLayerIndex})`);
+                });
+                
+                console.log('✅ UI de layers atualizada');
+            } catch (error) {
+                console.error('❌ Erro ao atualizar layers UI:', error);
+            }
+        }
+
+        function addNewLayer() {
+            try {
+                console.log('🎨 Adicionando nova layer...');
+                
+                const name = prompt('Nome da nova camada:') || `Layer ${editor.layers.length + 1}`;
+                if (!name.trim()) {
+                    console.log('⚠️ Nome da layer cancelado');
+                    return;
+                }
+                
+                const layer = editor.addLayer(name);
+                if (layer) {
+                    updateLayersUI();
+                    showNotification(`Layer '${name}' adicionada!`, 'success');
+                } else {
+                    showNotification('Erro ao criar layer', 'error');
+                }
+            } catch (error) {
+                console.error('❌ Erro ao adicionar layer:', error);
+                showNotification('Erro ao criar nova layer', 'error');
+            }
+        }
+
+        function deleteCurrentLayer() {
+            if (confirm('Deletar camada atual?')) {
+                editor.removeLayer();
+                updateLayersUI();
+            }
+        }
+
+        function setActiveLayer(index) {
+            editor.setActiveLayer(index);
+            updateLayersUI();
+        }
+
+        function toggleLayerVisibility(index) {
+            editor.toggleLayerVisibility(index);
+            updateLayersUI();
+        }
+
+        function duplicateLayer(index) {
+            const originalLayer = editor.layers[index];
+            const newLayer = editor.addLayer(`${originalLayer.name} copy`);
+            
+            newLayer.ctx.drawImage(originalLayer.canvas, 0, 0);
+            editor.render();
+            updateLayersUI();
+        }
+
+        function lockLayer(index) {
+            const layer = editor.layers[index];
+            layer.locked = !layer.locked;
+            updateLayersUI();
+        }
+
+        // CONTROLES DE ARQUIVO
+        function createNewDocument() {
+            try {
+                console.log('📄 Criando novo documento...');
+                
+                if (!editor) {
+                    showNotification('Editor não inicializado', 'error');
+                    return;
+                }
+                
+                const width = parseInt(prompt('Largura:', '800')) || 800;
+                const height = parseInt(prompt('Altura:', '600')) || 600;
+                
+                if (width > 0 && height > 0 && width <= 4000 && height <= 4000) {
+                    editor.createInitialDocument(width, height);
+                    updateLayersUI();
+                    showNotification(`Novo documento criado: ${width}x${height}`, 'success');
+                    console.log(`✅ Documento criado: ${width}x${height}`);
+                } else {
+                    showNotification('Dimensões inválidas (1-4000px)', 'warning');
+                }
+            } catch (error) {
+                console.error('❌ Erro ao criar documento:', error);
+                showNotification('Erro ao criar novo documento', 'error');
+            }
+        }
+
+        function saveImage() {
+            try {
+                console.log('💾 Salvando imagem...');
+                
+                if (!editor) {
+                    showNotification('Editor não inicializado', 'error');
+                    return;
+                }
+                
+                const result = editor.saveImage('png');
+                if (result) {
+                    console.log('✅ Imagem salva:', result);
+                }
+            } catch (error) {
+                console.error('❌ Erro ao salvar:', error);
+                showNotification('Erro ao salvar imagem', 'error');
+            }
+        }
+
+        function exportImage() {
+            const format = prompt('Formato (png/jpg/webp):', 'png') || 'png';
+            const quality = format === 'jpg' ? (parseFloat(prompt('Qualidade (0.1-1.0):', '0.9')) || 0.9) : 1.0;
+            
+            editor.saveImage(format, quality);
+        }
+
+        function resizeCanvas() {
+            const width = parseInt(prompt('Nova largura:', editor.canvas.width));
+            const height = parseInt(prompt('Nova altura:', editor.canvas.height));
+            
+            if (width > 0 && height > 0) {
+                editor.resize(width, height);
+                showNotification(`Canvas redimensionado: ${width}x${height}`, 'info');
+            }
+        }
+
+        function clearCanvas() {
+            if (confirm('Limpar a camada atual?')) {
+                editor.clear();
+            }
+        }
+
+        function showInfo() {
+            const info = editor.getInfo();
+            alert(`📊 Informações do Editor:
+                
+Dimensões: ${info.width}x${info.height}px
+Camadas: ${info.layers}
+Camada ativa: ${info.activeLayer + 1}
+Ferramenta: ${info.tool}
+Histórico: ${info.historyStep + 1}/${info.historySteps}`);
+        }
+
+        // FILTROS
+        function applyFilter(filterName, ...params) {
+            try {
+                console.log('🌈 Interface: aplicando filtro', filterName, 'params:', params);
+                
+                if (!editor) {
+                    console.error('❌ Editor não disponível para filtro');
+                    showNotification('Editor não inicializado', 'error');
+                    return;
+                }
+                
+                showLoading(true);
+                
+                setTimeout(() => {
+                    try {
+                        editor.applyFilter(filterName, ...params);
+                        updateLayersUI(); // Atualizar UI após filtro
+                    } catch (error) {
+                        console.error('❌ Erro ao aplicar filtro:', error);
+                        showNotification('Erro ao aplicar filtro: ' + error.message, 'error');
+                    } finally {
+                        showLoading(false);
+                    }
+                }, 10); // Reduzindo delay para melhor responsividade
+            } catch (error) {
+                console.error('❌ Erro na interface de filtros:', error);
+                showLoading(false);
+            }
+        }
+
+        // SISTEMA DE NOTIFICAÇÕES
+        function showNotification(message, type = 'info') {
+            // Remover notificação anterior
+            if (currentNotification) {
+                currentNotification.remove();
+            }
+            
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            currentNotification = notification;
+            
+            // Mostrar com animação
+            setTimeout(() => notification.classList.add('show'), 10);
+            
+            // Remover após 3 segundos
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.remove();
+                    }
+                    if (currentNotification === notification) {
+                        currentNotification = null;
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        function showLoading(show) {
+            const loading = document.getElementById('loading');
+            loading.classList.toggle('show', show);
+        }
+
+        // ATALHOS DE TECLADO GLOBAIS
+        document.addEventListener('keydown', (e) => {
+            // Prevenir atalhos quando estiver digitando
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+            
+            if (e.ctrlKey || e.metaKey) {
+                switch (e.key.toLowerCase()) {
+                    case 'o':
+                        e.preventDefault();
+                        document.getElementById('fileInput').click();
+                        break;
+                    case 'n':
+                        e.preventDefault();
+                        createNewDocument();
+                        break;
+                }
+            }
+        });
+
+        // Prevenir comportamentos padrão do navegador
+        document.addEventListener('dragover', (e) => e.preventDefault());
+        document.addEventListener('drop', (e) => e.preventDefault());
+    </script>
+</body>
+</html>
